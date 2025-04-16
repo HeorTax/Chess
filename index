@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChessMaster - Create Your Account</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chess-bg {
+            background-image: url('https://images.unsplash.com/photo-1543092587-d8b8feaf3626?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .chess-board {
+            background-image: url('https://images.unsplash.com/photo-1523730205978-59fd1b2965e3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+        }
+        .form-container {
+            backdrop-filter: blur(10px);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .input-highlight:focus {
+            box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.5);
+        }
+        .pawn-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="chess-bg min-h-screen text-white">
+    <!-- Navigation -->
+    <nav class="bg-black bg-opacity-70 py-4 px-6 flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-chess text-amber-500 text-2xl"></i>
+            <span class="text-xl font-bold">ChessMaster</span>
+        </div>
+        <div class="hidden md:flex space-x-6">
+            <a href="#" class="hover:text-amber-400 transition">Home</a>
+            <a href="#" class="hover:text-amber-400 transition">Play</a>
+            <a href="#" class="hover:text-amber-400 transition">Learn</a>
+            <a href="#" class="hover:text-amber-400 transition">Community</a>
+        </div>
+        <div>
+            <button id="loginBtn" class="bg-transparent border border-amber-500 text-amber-500 px-4 py-2 rounded hover:bg-amber-500 hover:text-white transition">
+                Login
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <div class="flex flex-col lg:flex-row items-center justify-center gap-12">
+            <!-- Left Side - Chess Board -->
+            <div class="w-full lg:w-1/2 flex justify-center">
+                <div class="chess-board rounded-lg shadow-2xl overflow-hidden w-full max-w-md h-96 relative">
+                    <div class="absolute inset-0 bg-black bg-opacity-40 flex flex-col items-center justify-center p-8 text-center">
+                        <h2 class="text-3xl font-bold mb-4">Join the Chess Revolution</h2>
+                        <p class="mb-6">Play against millions of players worldwide, improve your skills with our interactive lessons, and climb the leaderboards!</p>
+                        <div class="flex space-x-4">
+                            <div class="pawn-animation">
+                                <i class="fas fa-chess-pawn text-4xl text-amber-400"></i>
+                            </div>
+                            <div class="pawn-animation" style="animation-delay: 0.5s;">
+                                <i class="fas fa-chess-knight text-4xl text-amber-400"></i>
+                            </div>
+                            <div class="pawn-animation" style="animation-delay: 1s;">
+                                <i class="fas fa-chess-queen text-4xl text-amber-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Registration Form -->
+            <div class="w-full lg:w-1/2">
+                <div class="form-container rounded-lg p-8 max-w-md mx-auto border border-gray-700 shadow-xl">
+                    <h1 class="text-3xl font-bold mb-6 text-center">Create Your Account</h1>
+                    
+                    <form id="registrationForm" class="space-y-6">
+                        <div>
+                            <label for="username" class="block mb-2 font-medium">Username</label>
+                            <input type="text" id="username" name="username" required 
+                                   class="w-full px-4 py-3 bg-gray-800 bg-opacity-70 border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500 input-highlight text-white"
+                                   placeholder="chessmaster123">
+                            <p class="text-xs text-gray-400 mt-1">This will be your display name</p>
+                        </div>
+                        
+                        <div>
+                            <label for="email" class="block mb-2 font-medium">Email</label>
+                            <input type="email" id="email" name="email" required 
+                                   class="w-full px-4 py-3 bg-gray-800 bg-opacity-70 border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500 input-highlight text-white"
+                                   placeholder="your@email.com">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block mb-2 font-medium">Password</label>
+                            <input type="password" id="password" name="password" required 
+                                   class="w-full px-4 py-3 bg-gray-800 bg-opacity-70 border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500 input-highlight text-white"
+                                   placeholder="••••••••">
+                            <div class="flex mt-2 space-x-2">
+                                <div class="h-1 w-1/4 bg-red-500 rounded-full password-strength"></div>
+                                <div class="h-1 w-1/4 bg-gray-600 rounded-full password-strength"></div>
+                                <div class="h-1 w-1/4 bg-gray-600 rounded-full password-strength"></div>
+                                <div class="h-1 w-1/4 bg-gray-600 rounded-full password-strength"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="confirm-password" class="block mb-2 font-medium">Confirm Password</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required 
+                                   class="w-full px-4 py-3 bg-gray-800 bg-opacity-70 border border-gray-600 rounded-lg focus:outline-none focus:border-amber-500 input-highlight text-white"
+                                   placeholder="••••••••">
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="terms" name="terms" required 
+                                   class="w-4 h-4 text-amber-600 bg-gray-700 border-gray-600 rounded focus:ring-amber-500">
+                            <label for="terms" class="ml-2 text-sm">
+                                I agree to the <a href="#" class="text-amber-400 hover:underline">Terms of Service</a> and <a href="#" class="text-amber-400 hover:underline">Privacy Policy</a>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                            <i class="fas fa-chess-king mr-2"></i> Create Account
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-400">Already have an account? <a href="#" class="text-amber-400 hover:underline" id="switchToLogin">Log in</a></p>
+                    </div>
+                    
+                    <div class="mt-8">
+                        <p class="text-center text-gray-400 mb-3">Or sign up with</p>
+                        <div class="flex justify-center space-x-4">
+                            <button class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button class="bg-gray-800 hover:bg-gray-700 text-white p-3 rounded-full">
+                                <i class="fab fa-apple"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Features Section -->
+    <section class="bg-black bg-opacity-70 py-16 px-4">
+        <div class="container mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12">Why Join ChessMaster?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg hover:bg-opacity-70 transition">
+                    <div class="text-amber-500 text-4xl mb-4">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Competitive Play</h3>
+                    <p class="text-gray-300">Test your skills against players of all levels with our ELO rating system and climb the global leaderboards.</p>
+                </div>
+                <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg hover:bg-opacity-70 transition">
+                    <div class="text-amber-500 text-4xl mb-4">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Interactive Lessons</h3>
+                    <p class="text-gray-300">Learn from grandmasters with our comprehensive video tutorials and practice puzzles.</p>
+                </div>
+                <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg hover:bg-opacity-70 transition">
+                    <div class="text-amber-500 text-4xl mb-4">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Vibrant Community</h3>
+                    <p class="text-gray-300">Join clubs, participate in tournaments, and discuss strategies with chess enthusiasts worldwide.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black bg-opacity-90 py-8 px-4">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="flex items-center space-x-2 mb-4 md:mb-0">
+                    <i class="fas fa-chess text-amber-500 text-2xl"></i>
+                    <span class="text-xl font-bold">ChessMaster</span>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="hover:text-amber-400 transition">About</a>
+                    <a href="#" class="hover:text-amber-400 transition">Contact</a>
+                    <a href="#" class="hover:text-amber-400 transition">Privacy</a>
+                    <a href="#" class="hover:text-amber-400 transition">Terms</a>
+                </div>
+            </div>
+            <div class="mt-8 text-center text-gray-500 text-sm">
+                <p>© 2023 ChessMaster. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 relative">
+            <button id="closeLoginModal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6">Login to ChessMaster</h2>
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label for="login-email" class="block mb-2">Email</label>
+                    <input type="email" id="login-email" required 
+                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-amber-500 text-white">
+                </div>
+                <div>
+                    <label for="login-password" class="block mb-2">Password</label>
+                    <input type="password" id="login-password" required 
+                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-amber-500 text-white">
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="w-4 h-4 text-amber-600 bg-gray-700 border-gray-600 rounded focus:ring-amber-500">
+                        <label for="remember-me" class="ml-2 text-sm">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm text-amber-400 hover:underline">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded transition duration-300">
+                    Login
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <p class="text-gray-400">Don't have an account? <a href="#" class="text-amber-400 hover:underline" id="switchToRegister">Sign up</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <div class="text-6xl text-amber-500 mb-4">
+                <i class="fas fa-chess-king"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Welcome to ChessMaster!</h2>
+            <p class="mb-6">Your account has been successfully created. Check your email to verify your account.</p>
+            <button id="closeSuccessModal" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-6 rounded transition duration-300">
+                Start Playing
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const strengthBars = document.querySelectorAll('.password-strength');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+            
+            strengthBars.forEach((bar, index) => {
+                bar.className = `h-1 w-1/4 rounded-full ${index < strength ? 'bg-green-500' : 'bg-gray-600'}`;
+            });
+        });
+
+        // Form validation
+        const registrationForm = document.getElementById('registrationForm');
+        const confirmPassword = document.getElementById('confirm-password');
+        
+        registrationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Check if passwords match
+            if (passwordInput.value !== confirmPassword.value) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Show success modal
+            document.getElementById('successModal').classList.remove('hidden');
+        });
+
+        // Modal controls
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const closeSuccessModal = document.getElementById('closeSuccessModal');
+        const switchToLogin = document.getElementById('switchToLogin');
+        const switchToRegister = document.getElementById('switchToRegister');
+        
+        loginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+        closeLoginModal.addEventListener('click', () => loginModal.classList.add('hidden'));
+        closeSuccessModal.addEventListener('click', () => {
+            document.getElementById('successModal').classList.add('hidden');
+            // Here you would typically redirect to the dashboard
+        });
+        
+        switchToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.remove('hidden');
+        });
+        
+        switchToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.classList.add('hidden');
+        });
+        
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) loginModal.classList.add('hidden');
+            if (e.target === document.getElementById('successModal')) {
+                document.getElementById('successModal').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
