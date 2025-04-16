@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChessMaster - Create Your Account</title>
+    <title>ChessMaster - Play Chess Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chess.js@0.11.0/chess.min.js"></script>
     <style>
         .chess-bg {
             background-image: url('https://images.unsplash.com/photo-1543092587-d8b8feaf3626?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
@@ -31,6 +32,51 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
+        #chessboard {
+            width: 400px;
+            height: 400px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        .chess-square {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .light {
+            background-color: #f0d9b5;
+        }
+        .dark {
+            background-color: #b58863;
+        }
+        .highlight {
+            background-color: rgba(255, 255, 0, 0.4);
+        }
+        .possible-move {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        .chess-piece {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: grab;
+        }
+        .chess-piece:active {
+            cursor: grabbing;
+        }
+        .capture-highlight {
+            background-color: rgba(255, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body class="chess-bg min-h-screen text-white">
@@ -46,7 +92,10 @@
             <a href="#" class="hover:text-amber-400 transition">Learn</a>
             <a href="#" class="hover:text-amber-400 transition">Community</a>
         </div>
-        <div>
+        <div class="flex space-x-4">
+            <button id="playGuestBtn" class="bg-transparent border border-amber-500 text-amber-500 px-4 py-2 rounded hover:bg-amber-500 hover:text-white transition">
+                Play as Guest
+            </button>
             <button id="loginBtn" class="bg-transparent border border-amber-500 text-amber-500 px-4 py-2 rounded hover:bg-amber-500 hover:text-white transition">
                 Login
             </button>
@@ -254,6 +303,50 @@
         </div>
     </div>
 
+    <!-- Game Modal -->
+    <div id="gameModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-gray-800 rounded-lg p-8 max-w-4xl w-full mx-4 relative">
+            <button id="closeGameModal" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center">Chess Game</h2>
+            <div class="flex flex-col lg:flex-row gap-8">
+                <div class="flex justify-center">
+                    <div id="chessboard"></div>
+                </div>
+                <div class="flex-1">
+                    <div class="bg-gray-700 p-4 rounded-lg mb-4">
+                        <h3 class="text-lg font-bold mb-2">Game Info</h3>
+                        <div class="flex justify-between mb-2">
+                            <span>Player:</span>
+                            <span id="playerColor" class="font-bold">White</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span>Status:</span>
+                            <span id="gameStatus" class="font-bold">Your turn</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Move History:</span>
+                            <span id="moveCount">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
+                        <h3 class="text-lg font-bold mb-2">Move History</h3>
+                        <div id="moveHistory" class="space-y-1"></div>
+                    </div>
+                    <div class="mt-4 flex space-x-4">
+                        <button id="newGameBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
+                            New Game
+                        </button>
+                        <button id="resignBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
+                            Resign
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Password strength indicator
         const passwordInput = document.getElementById('password');
@@ -292,14 +385,22 @@
 
         // Modal controls
         const loginBtn = document.getElementById('loginBtn');
+        const playGuestBtn = document.getElementById('playGuestBtn');
         const loginModal = document.getElementById('loginModal');
+        const gameModal = document.getElementById('gameModal');
         const closeLoginModal = document.getElementById('closeLoginModal');
+        const closeGameModal = document.getElementById('closeGameModal');
         const closeSuccessModal = document.getElementById('closeSuccessModal');
         const switchToLogin = document.getElementById('switchToLogin');
         const switchToRegister = document.getElementById('switchToRegister');
         
         loginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
+        playGuestBtn.addEventListener('click', () => {
+            gameModal.classList.remove('hidden');
+            initChessGame();
+        });
         closeLoginModal.addEventListener('click', () => loginModal.classList.add('hidden'));
+        closeGameModal.addEventListener('click', () => gameModal.classList.add('hidden'));
         closeSuccessModal.addEventListener('click', () => {
             document.getElementById('successModal').classList.add('hidden');
             // Here you would typically redirect to the dashboard
@@ -321,7 +422,210 @@
             if (e.target === document.getElementById('successModal')) {
                 document.getElementById('successModal').classList.add('hidden');
             }
+            if (e.target === gameModal) gameModal.classList.add('hidden');
         });
+
+        // Chess Game Implementation
+        let game;
+        let selectedSquare = null;
+        let possibleMoves = [];
+        let playerColor = 'white';
+        let moveHistory = [];
+
+        function initChessGame() {
+            game = new Chess();
+            selectedSquare = null;
+            possibleMoves = [];
+            playerColor = 'white';
+            moveHistory = [];
+            
+            document.getElementById('playerColor').textContent = 'White';
+            document.getElementById('gameStatus').textContent = 'Your turn';
+            document.getElementById('moveCount').textContent = '0';
+            document.getElementById('moveHistory').innerHTML = '';
+            
+            renderBoard();
+            updateStatus();
+        }
+
+        function renderBoard() {
+            const boardElement = document.getElementById('chessboard');
+            boardElement.innerHTML = '';
+            
+            // Determine if we should flip the board based on player color
+            const flipBoard = playerColor === 'black';
+            
+            for (let i = 0; i < 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    const squareIndex = flipBoard ? (63 - (i * 8 + j)) : (i * 8 + j);
+                    const square = document.createElement('div');
+                    square.className = `chess-square ${(i + j) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.index = squareIndex;
+                    
+                    // Highlight selected square
+                    if (selectedSquare === squareIndex) {
+                        square.classList.add('highlight');
+                    }
+                    
+                    // Highlight possible moves
+                    const move = possibleMoves.find(m => m.to === squareIndex);
+                    if (move) {
+                        const moveIndicator = document.createElement('div');
+                        moveIndicator.className = 'possible-move';
+                        
+                        // Check if it's a capture move
+                        const piece = game.get(squareIndexToAlgebraic(squareIndex));
+                        if (piece && piece.color !== game.get(squareIndexToAlgebraic(selectedSquare)).color) {
+                            square.classList.add('capture-highlight');
+                        } else {
+                            square.appendChild(moveIndicator);
+                        }
+                    }
+                    
+                    // Add piece if exists
+                    const piece = game.get(squareIndexToAlgebraic(squareIndex));
+                    if (piece) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = 'chess-piece';
+                        pieceElement.style.backgroundImage = `url('https://images.chesscomfiles.com/chess-themes/pieces/neo/150/${piece.color}${piece.type}.png')`;
+                        pieceElement.dataset.piece = `${piece.color}${piece.type}`;
+                        square.appendChild(pieceElement);
+                    }
+                    
+                    square.addEventListener('click', () => handleSquareClick(squareIndex));
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(squareIndex) {
+            const clickedSquare = squareIndexToAlgebraic(squareIndex);
+            const piece = game.get(clickedSquare);
+            
+            // If no square is selected and the clicked square has a piece of the current player's color
+            if (selectedSquare === null) {
+                if (piece && piece.color === game.turn()) {
+                    selectedSquare = squareIndex;
+                    possibleMoves = game.moves({
+                        square: clickedSquare,
+                        verbose: true
+                    });
+                    renderBoard();
+                }
+            } 
+            // If a square is already selected
+            else {
+                // If clicking on the same square, deselect it
+                if (squareIndex === selectedSquare) {
+                    selectedSquare = null;
+                    possibleMoves = [];
+                    renderBoard();
+                    return;
+                }
+                
+                // If clicking on another piece of the same color, select that piece instead
+                if (piece && piece.color === game.get(squareIndexToAlgebraic(selectedSquare)).color) {
+                    selectedSquare = squareIndex;
+                    possibleMoves = game.moves({
+                        square: clickedSquare,
+                        verbose: true
+                    });
+                    renderBoard();
+                    return;
+                }
+                
+                // Check if the move is valid
+                const move = possibleMoves.find(m => m.to === clickedSquare);
+                if (move) {
+                    // Make the move
+                    game.move(move);
+                    moveHistory.push(`${move.piece.toUpperCase()} ${move.from}-${move.to}`);
+                    updateMoveHistory();
+                    
+                    // Reset selection
+                    selectedSquare = null;
+                    possibleMoves = [];
+                    
+                    // Render the board and update status
+                    renderBoard();
+                    updateStatus();
+                    
+                    // If playing against AI, make AI move
+                    if (game.turn() !== playerColor && !game.isGameOver()) {
+                        setTimeout(makeAiMove, 500);
+                    }
+                }
+            }
+        }
+
+        function makeAiMove() {
+            // Simple AI - just pick a random move
+            const possibleMoves = game.moves({verbose: true});
+            if (possibleMoves.length > 0) {
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                game.move(randomMove);
+                moveHistory.push(`${randomMove.piece.toUpperCase()} ${randomMove.from}-${randomMove.to}`);
+                updateMoveHistory();
+                renderBoard();
+                updateStatus();
+            }
+        }
+
+        function updateStatus() {
+            document.getElementById('moveCount').textContent = moveHistory.length;
+            
+            if (game.isCheckmate()) {
+                document.getElementById('gameStatus').textContent = `Checkmate! ${game.turn() === 'w' ? 'Black' : 'White'} wins!`;
+            } else if (game.isDraw()) {
+                document.getElementById('gameStatus').textContent = 'Game ended in a draw!';
+            } else if (game.isCheck()) {
+                document.getElementById('gameStatus').textContent = `${game.turn() === 'w' ? 'White' : 'Black'} is in check!`;
+            } else {
+                document.getElementById('gameStatus').textContent = game.turn() === playerColor ? 'Your turn' : 'Opponent\'s turn';
+            }
+        }
+
+        function updateMoveHistory() {
+            const moveHistoryElement = document.getElementById('moveHistory');
+            moveHistoryElement.innerHTML = '';
+            
+            for (let i = 0; i < moveHistory.length; i++) {
+                const moveItem = document.createElement('div');
+                moveItem.className = 'flex justify-between';
+                moveItem.innerHTML = `
+                    <span>${i + 1}.</span>
+                    <span>${moveHistory[i]}</span>
+                `;
+                moveHistoryElement.appendChild(moveItem);
+            }
+            
+            // Scroll to bottom
+            moveHistoryElement.scrollTop = moveHistoryElement.scrollHeight;
+        }
+
+        function squareIndexToAlgebraic(index) {
+            const file = String.fromCharCode(97 + (index % 8));
+            const rank = 8 - Math.floor(index / 8);
+            return file + rank;
+        }
+
+        // New game button
+        document.getElementById('newGameBtn').addEventListener('click', () => {
+            // Toggle player color
+            playerColor = playerColor === 'white' ? 'black' : 'white';
+            document.getElementById('playerColor').textContent = playerColor === 'white' ? 'White' : 'Black';
+            initChessGame();
+        });
+
+        // Resign button
+        document.getElementById('resignBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to resign?')) {
+                document.getElementById('gameStatus').textContent = `Game over! ${playerColor === 'white' ? 'Black' : 'White'} wins by resignation.`;
+            }
+        });
+
+        // Initialize game when page loads (for testing)
+        // initChessGame();
     </script>
 </body>
 </html>
