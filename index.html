@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChessMaster - Play Chess Online</title>
+    <!-- Firebase SDK'ları -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <!-- Diğer kütüphaneler -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chess.js@0.11.0/chess.min.js"></script>
@@ -352,32 +357,133 @@
                         </div>
                         <div class="flex justify-between mb-2">
                             <span>Status:</span>
-            <span id="gameStatus" class="font-bold">Your turn</span>
-        </div>
-        <div class="flex justify-between">
-            <span>Move History:</span>
-            <span id="moveCount">0</span>
-        </div>
-    </div>
-    <div class="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
-        <h3 class="text-lg font-bold mb-2">Move History</h3>
-        <div id="moveHistory" class="space-y-1"></div>
-    </div>
-    <div class="mt-4 flex space-x-4">
-        <button id="newGameBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
-            New Game
-        </button>
-        <button id="resignBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
-            Resign
-        </button>
-    </div>
-</div>
+                            <span id="gameStatus" class="font-bold">Your turn</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Move History:</span>
+                            <span id="moveCount">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg max-h-48 overflow-y-auto">
+                        <h3 class="text-lg font-bold mb-2">Move History</h3>
+                        <div id="moveHistory" class="space-y-1"></div>
+                    </div>
+                    <div class="mt-4 flex space-x-4">
+                        <button id="newGameBtn" class="bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
+                            New Game
+                        </button>
+                        <button id="resignBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded transition duration-300 flex-1">
+                            Resign
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Password strength indicator
+        // Firebase konfigürasyonu
+        const firebaseConfig = {
+            apiKey: "AIzaSyAna4rrijSaj24KdrnB6tntSoN4efcLv4M",
+            authDomain: "chess-master-121fc.firebaseapp.com",
+            projectId: "chess-master-121fc",
+            storageBucket: "chess-master-121fc.firebasestorage.app",
+            messagingSenderId: "42869848776",
+            appId: "1:42869848776:web:1abff6b7a4912eb7a543fd",
+            measurementId: "G-9PTY6ZLB0N"
+        };
+
+        // Firebase'i başlat
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Kullanıcı oturum durumu takibi
+        auth.onAuthStateChanged((user) => {
+            const loginBtn = document.getElementById('loginBtn');
+            if (user) {
+                loginBtn.textContent = 'Logout';
+                loginBtn.onclick = () => auth.signOut();
+                console.log("Kullanıcı giriş yaptı:", user.email);
+            } else {
+                loginBtn.textContent = 'Login';
+                loginBtn.onclick = () => document.getElementById('loginModal').classList.remove('hidden');
+                console.log("Kullanıcı çıkış yaptı");
+            }
+        });
+
+        // Kayıt formu işlemi
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const username = document.getElementById('username').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // Şifre kontrolü
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            try {
+                // 1. Firebase Authentication'da kullanıcı oluştur
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                
+                // 2. Firestore'da kullanıcı bilgilerini kaydet
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    username: username,
+                    email: email,
+                    eloRating: 1000,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    lastLogin: new Date()
+                });
+
+                // 3. Email doğrulama gönder
+                await userCredential.user.sendEmailVerification();
+                
+                // 4. Başarılı modalını göster
+                document.getElementById('successModal').classList.remove('hidden');
+                
+                // 5. Formu temizle
+                e.target.reset();
+                
+            } catch (error) {
+                console.error("Kayıt hatası:", error);
+                alert(`Registration failed: ${error.message}`);
+            }
+        });
+
+        // Giriş formu işlemi
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                // Firebase ile giriş yap
+                await auth.signInWithEmailAndPassword(email, password);
+                
+                // Başarılıysa modalı kapat ve oyunu aç
+                document.getElementById('loginModal').classList.add('hidden');
+                document.getElementById('gameModal').classList.remove('hidden');
+                initChessGame();
+                
+            } catch (error) {
+                console.error("Giriş hatası:", error);
+                alert(`Login failed: ${error.message}`);
+            }
+        });
+
+        // Misafir giriş butonu
+        document.getElementById('playGuestBtn').addEventListener('click', () => {
+            document.getElementById('gameModal').classList.remove('hidden');
+            initChessGame();
+        });
+
+        // Şifre güç göstergesi
         const passwordInput = document.getElementById('password');
         const strengthBars = document.querySelectorAll('.password-strength');
         
@@ -395,66 +501,30 @@
             });
         });
 
-        // Form validation
-        const registrationForm = document.getElementById('registrationForm');
-        const confirmPassword = document.getElementById('confirm-password');
-        
-        registrationForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Check if passwords match
-            if (passwordInput.value !== confirmPassword.value) {
-                alert('Passwords do not match!');
-                return;
-            }
-            
-            // Show success modal
-            document.getElementById('successModal').classList.remove('hidden');
+        // Modal kontrolleri
+        document.getElementById('closeLoginModal').addEventListener('click', () => {
+            document.getElementById('loginModal').classList.add('hidden');
         });
 
-        // Modal controls
-        const loginBtn = document.getElementById('loginBtn');
-        const playGuestBtn = document.getElementById('playGuestBtn');
-        const loginModal = document.getElementById('loginModal');
-        const gameModal = document.getElementById('gameModal');
-        const closeLoginModal = document.getElementById('closeLoginModal');
-        const closeGameModal = document.getElementById('closeGameModal');
-        const closeSuccessModal = document.getElementById('closeSuccessModal');
-        const switchToLogin = document.getElementById('switchToLogin');
-        const switchToRegister = document.getElementById('switchToRegister');
-        
-        loginBtn.addEventListener('click', () => loginModal.classList.remove('hidden'));
-        playGuestBtn.addEventListener('click', () => {
-            gameModal.classList.remove('hidden');
-            initChessGame();
-        });
-        closeLoginModal.addEventListener('click', () => loginModal.classList.add('hidden'));
-        closeGameModal.addEventListener('click', () => gameModal.classList.add('hidden'));
-        closeSuccessModal.addEventListener('click', () => {
+        document.getElementById('closeSuccessModal').addEventListener('click', () => {
             document.getElementById('successModal').classList.add('hidden');
-            // Here you would typically redirect to the dashboard
-        });
-        
-        switchToLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginModal.classList.remove('hidden');
-        });
-        
-        switchToRegister.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginModal.classList.add('hidden');
-        });
-        
-        // Close modals when clicking outside
-        window.addEventListener('click', (e) => {
-            if (e.target === loginModal) loginModal.classList.add('hidden');
-            if (e.target === document.getElementById('successModal')) {
-                document.getElementById('successModal').classList.add('hidden');
-            }
-            if (e.target === gameModal) gameModal.classList.add('hidden');
         });
 
-        // Chess Game Implementation
+        document.getElementById('closeGameModal').addEventListener('click', () => {
+            document.getElementById('gameModal').classList.add('hidden');
+        });
+
+        document.getElementById('switchToLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('loginModal').classList.remove('hidden');
+        });
+
+        document.getElementById('switchToRegister').addEventListener('click', (e) => {
+            e.preventDefault();
+            document.getElementById('loginModal').classList.add('hidden');
+        });
+
+        // Satranç oyunu implementasyonu
         let game;
         let selectedSquare = null;
         let possibleMoves = [];
@@ -481,7 +551,6 @@
             const boardElement = document.getElementById('chessboard');
             boardElement.innerHTML = '';
             
-            // Determine if we should flip the board based on player color
             const flipBoard = playerColor === 'black';
             
             for (let i = 0; i < 8; i++) {
@@ -491,18 +560,15 @@
                     square.className = `chess-square ${(i + j) % 2 === 0 ? 'light' : 'dark'}`;
                     square.dataset.index = squareIndex;
                     
-                    // Highlight selected square
                     if (selectedSquare === squareIndex) {
                         square.classList.add('highlight');
                     }
                     
-                    // Highlight possible moves
                     const move = possibleMoves.find(m => m.to === squareIndex);
                     if (move) {
                         const moveIndicator = document.createElement('div');
                         moveIndicator.className = 'possible-move';
                         
-                        // Check if it's a capture move
                         const piece = game.get(squareIndexToAlgebraic(squareIndex));
                         if (piece && piece.color !== game.get(squareIndexToAlgebraic(selectedSquare)).color) {
                             square.classList.add('capture-highlight');
@@ -511,7 +577,6 @@
                         }
                     }
                     
-                    // Add piece if exists
                     const piece = game.get(squareIndexToAlgebraic(squareIndex));
                     if (piece) {
                         const pieceElement = document.createElement('div');
@@ -531,7 +596,6 @@
             const clickedSquare = squareIndexToAlgebraic(squareIndex);
             const piece = game.get(clickedSquare);
             
-            // If no square is selected and the clicked square has a piece of the current player's color
             if (selectedSquare === null) {
                 if (piece && piece.color === game.turn()) {
                     selectedSquare = squareIndex;
@@ -541,10 +605,7 @@
                     });
                     renderBoard();
                 }
-            } 
-            // If a square is already selected
-            else {
-                // If clicking on the same square, deselect it
+            } else {
                 if (squareIndex === selectedSquare) {
                     selectedSquare = null;
                     possibleMoves = [];
@@ -552,7 +613,6 @@
                     return;
                 }
                 
-                // If clicking on another piece of the same color, select that piece instead
                 if (piece && piece.color === game.get(squareIndexToAlgebraic(selectedSquare)).color) {
                     selectedSquare = squareIndex;
                     possibleMoves = game.moves({
@@ -563,23 +623,18 @@
                     return;
                 }
                 
-                // Check if the move is valid
                 const move = possibleMoves.find(m => m.to === clickedSquare);
                 if (move) {
-                    // Make the move
                     game.move(move);
                     moveHistory.push(`${move.piece.toUpperCase()} ${move.from}-${move.to}`);
                     updateMoveHistory();
                     
-                    // Reset selection
                     selectedSquare = null;
                     possibleMoves = [];
                     
-                    // Render the board and update status
                     renderBoard();
                     updateStatus();
                     
-                    // If playing against AI, make AI move
                     if (game.turn() !== playerColor && !game.isGameOver()) {
                         setTimeout(makeAiMove, 500);
                     }
@@ -588,7 +643,6 @@
         }
 
         function makeAiMove() {
-            // Simple AI - just pick a random move
             const possibleMoves = game.moves({verbose: true});
             if (possibleMoves.length > 0) {
                 const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
@@ -628,7 +682,6 @@
                 moveHistoryElement.appendChild(moveItem);
             }
             
-            // Scroll to bottom
             moveHistoryElement.scrollTop = moveHistoryElement.scrollHeight;
         }
 
@@ -638,23 +691,22 @@
             return file + rank;
         }
 
-        // New game button
+        // Yeni oyun butonu
         document.getElementById('newGameBtn').addEventListener('click', () => {
-            // Toggle player color
             playerColor = playerColor === 'white' ? 'black' : 'white';
             document.getElementById('playerColor').textContent = playerColor === 'white' ? 'White' : 'Black';
             initChessGame();
         });
 
-        // Resign button
+        // Pes etme butonu
         document.getElementById('resignBtn').addEventListener('click', () => {
             if (confirm('Are you sure you want to resign?')) {
                 document.getElementById('gameStatus').textContent = `Game over! ${playerColor === 'white' ? 'Black' : 'White'} wins by resignation.`;
             }
         });
 
-        // Initialize game when page loads (for testing)
-        // initChessGame();
+        // Sayfa yüklendiğinde Firebase başlatıldığını kontrol et
+        console.log("Firebase initialized:", app.name);
     </script>
 </body>
 </html>
